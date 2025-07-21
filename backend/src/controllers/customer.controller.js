@@ -68,8 +68,6 @@ exports.updateCustomer = async (req, res) => {
 exports.deleteCustomer = async (req, res) => {
   const { id } = req.params;
   try {
-    // Before deleting a customer, consider cascading delete or preventing if active subscriptions/invoices exist.
-    // For now, a simple delete
     const [result] = await pool.query('DELETE FROM customers WHERE id = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).send({ message: "Customer not found." });
@@ -77,7 +75,6 @@ exports.deleteCustomer = async (req, res) => {
     res.status(200).send({ message: "Customer deleted successfully." });
   } catch (error) {
     console.error("Error deleting customer:", error);
-    // Handle constraint violation if customer has active subscriptions/invoices
     if (error.code === 'ER_ROW_IS_REFERENCED_2') {
         return res.status(409).send({ message: "Cannot delete customer: they have active subscriptions or invoices." });
     }

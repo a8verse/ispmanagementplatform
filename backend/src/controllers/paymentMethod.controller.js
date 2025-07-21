@@ -28,7 +28,7 @@ exports.getAllMethods = async (req, res) => {
     try {
         const [methods] = await pool.query("SELECT id, name, type, is_active, is_approval_required FROM payment_methods WHERE type = 'offline' ORDER BY name");
         res.status(200).send(methods);
-    } catch (error) {
+    } <<<<<<< Updated upstream catch (error) {
         console.error("Error fetching payment methods:", error);
         res.status(500).send({ message: "Error fetching payment methods.", error: error.message });
     }
