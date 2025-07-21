@@ -1,19 +1,20 @@
 import React from 'react';
-import './Modal.css';
+import '../App.css'; // Global CSS is loaded
 
-// This component takes props to control its visibility (isOpen),
-// a function to close it (onClose), and the content to display (children).
-const Modal = ({ isOpen, onClose, children }) => {
-  if (!isOpen) {
-    return null; // Don't render anything if the modal is not open
+const Modal = ({ show, onClose, children, title }) => {
+  if (!show) {
+    return null;
   }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close-button" onClick={onClose}>
-          &times;
-        </button>
+        <div className="modal-header">
+            <h2>{title || "Modal Title"}</h2>
+            <button className="modal-close-button" onClick={onClose}>
+                &times;
+            </button>
+        </div>
         {children}
       </div>
     </div>

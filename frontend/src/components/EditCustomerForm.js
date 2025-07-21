@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import apiClient from '../api/axiosConfig';
+import '../App.css'; // Ensure main CSS is loaded
 
 const EditCustomerForm = ({ customer, onCustomerUpdated }) => {
   const [formData, setFormData] = useState({ full_name: '', email: '', phone_number: '', address: '' });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // When the 'customer' prop changes, update the form data
   useEffect(() => {
     if (customer) {
       setFormData({
@@ -27,11 +27,11 @@ const EditCustomerForm = ({ customer, onCustomerUpdated }) => {
     setError('');
     setIsSubmitting(true);
     try {
-      // Send a PUT request to update the customer
       await apiClient.put(`/customers/${customer.id}`, formData);
-      onCustomerUpdated(); // Notify parent to refresh list and close modal
+      onCustomerUpdated();
     } catch (err) {
-      setError('Failed to update customer.');
+      setError(err.response?.data?.message || 'Failed to update customer.');
+      console.error("Error updating customer:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -39,25 +39,25 @@ const EditCustomerForm = ({ customer, onCustomerUpdated }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h4>Edit Customer (ID: {customer.id})</h4>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <div style={{ marginBottom: '10px' }}>
-        <label>Full Name: </label>
-        <input type="text" name="full_name" value={formData.full_name} onChange={handleChange} required />
+      <h3>Edit Customer (ID: {customer.id})</h3>
+      {error && <div className="alert error">{error}</div>}
+      <div className="form-group">
+        <label htmlFor="edit_full_name">Full Name: </label>
+        <input type="text" id="edit_full_name" name="full_name" value={formData.full_name} onChange={handleChange} required />
       </div>
-      <div style={{ marginBottom: '10px' }}>
-        <label>Email: </label>
-        <input type="email" name="email" value={formData.email} onChange={handleChange} />
+      <div className="form-group">
+        <label htmlFor="edit_email">Email: </label>
+        <input type="email" id="edit_email" name="email" value={formData.email} onChange={handleChange} />
       </div>
-      <div style={{ marginBottom: '10px' }}>
-        <label>Phone Number: </label>
-        <input type="text" name="phone_number" value={formData.phone_number} onChange={handleChange} required />
+      <div className="form-group">
+        <label htmlFor="edit_phone_number">Phone Number: </label>
+        <input type="text" id="edit_phone_number" name="phone_number" value={formData.phone_number} onChange={handleChange} required />
       </div>
-      <div style={{ marginBottom: '10px' }}>
-        <label>Address: </label>
-        <input type="text" name="address" value={formData.address} onChange={handleChange} required />
+      <div className="form-group">
+        <label htmlFor="edit_address">Address: </label>
+        <input type="text" id="edit_address" name="address" value={formData.address} onChange={handleChange} required />
       </div>
-      <button type="submit" disabled={isSubmitting}>
+      <button type="submit" className="primary-button" disabled={isSubmitting}>
         {isSubmitting ? 'Updating...' : 'Update Customer'}
       </button>
     </form>

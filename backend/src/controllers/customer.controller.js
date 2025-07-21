@@ -1,9 +1,9 @@
+// backend/src/controllers/customer.controller.js
 const pool = require('../config/db.config');
 
-// CREATE a new customer
 exports.createCustomer = async (req, res) => {
   const { full_name, email, phone_number, address } = req.body;
-  const created_by_user_id = req.user.id; // The logged-in user creating the customer
+  const created_by_user_id = req.user.id;
 
   if (!full_name || !phone_number || !address) {
     return res.status(400).send({ message: "Full name, phone number, and address are required." });
@@ -19,7 +19,6 @@ exports.createCustomer = async (req, res) => {
   }
 };
 
-// READ all customers (existing function)
 exports.getAllCustomers = async (req, res) => {
   try {
     const [customers] = await pool.query('SELECT id, full_name, email, phone_number, address FROM customers ORDER BY created_at DESC');
@@ -30,7 +29,6 @@ exports.getAllCustomers = async (req, res) => {
   }
 };
 
-// READ a single customer by ID
 exports.getCustomerById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -45,7 +43,6 @@ exports.getCustomerById = async (req, res) => {
   }
 };
 
-// UPDATE a customer
 exports.updateCustomer = async (req, res) => {
   const { id } = req.params;
   const { full_name, email, phone_number, address } = req.body;
@@ -68,10 +65,11 @@ exports.updateCustomer = async (req, res) => {
   }
 };
 
-// DELETE a customer
 exports.deleteCustomer = async (req, res) => {
   const { id } = req.params;
   try {
+    // Before deleting a customer, consider cascading delete or preventing if active subscriptions/invoices exist.
+    // For now, a simple delete
     const [result] = await pool.query('DELETE FROM customers WHERE id = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).send({ message: "Customer not found." });
@@ -79,6 +77,10 @@ exports.deleteCustomer = async (req, res) => {
     res.status(200).send({ message: "Customer deleted successfully." });
   } catch (error) {
     console.error("Error deleting customer:", error);
+    // Handle constraint violation if customer has active subscriptions/invoices
+    if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+        return res.status(409).send({ message: "Cannot delete customer: they have active subscriptions or invoices." });
+    }
     res.status(500).send({ message: "Error deleting customer." });
   }
 };

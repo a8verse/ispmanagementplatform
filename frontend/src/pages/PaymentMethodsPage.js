@@ -1,124 +1,173 @@
+// frontend/src/pages/PaymentMethodsPage.js
 import React, { useState, useEffect } from 'react';
-import apiClient from '../api/axiosConfig';
-import Modal from '../components/Modal'; // We'll reuse our modal component
+import api from '../api/axiosConfig';
+import Modal from '../components/Modal';
+import '../App.css'; // Global CSS is loaded
 
 const PaymentMethodsPage = () => {
-  const [methods, setMethods] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+    const [methods, setMethods] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentMethod, setCurrentMethod] = useState({ id: null, name: '', is_active: true, is_approval_required: true });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
 
-  // State for the form (for both adding and editing)
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingMethod, setEditingMethod] = useState(null);
-  const [methodName, setMethodName] = useState('');
+    useEffect(() => {
+        fetchPaymentMethods();
+    }, []);
 
-  const fetchMethods = async () => {
-    try {
-      setIsLoading(true);
-      const response = await apiClient.get('/payment-methods');
-      setMethods(response.data);
-    } catch (err) {
-      setError('Failed to fetch payment methods.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const fetchPaymentMethods = async () => {
+        setLoading(true);
+        setError('');
+        setSuccessMessage('');
+        try {
+            const response = await api.get('/payment-methods');
+            setMethods(response.data);
+        } catch (err) {
+            console.error('Error fetching payment methods:', err);
+            setError('Failed to load payment methods. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  useEffect(() => {
-    fetchMethods();
-  }, []);
+    const handleAddClick = () => {
+        setIsEditing(false);
+        setCurrentMethod({ id: null, name: '', is_active: true, is_approval_required: true });
+        setShowModal(true);
+        setSuccessMessage('');
+        setError('');
+    };
 
-  const handleOpenModal = (method = null) => {
-    setEditingMethod(method);
-    setMethodName(method ? method.name : '');
-    setError('');
-    setIsModalOpen(true);
-  };
+    const handleEditClick = (method) => {
+        setIsEditing(true);
+        setCurrentMethod({ ...method });
+        setShowModal(true);
+        setSuccessMessage('');
+        setError('');
+    };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingMethod(null);
-    setMethodName('');
-  };
+    const handleDeleteClick = async (id) => {
+        if (window.confirm('Are you sure you want to delete this payment method?')) {
+            try {
+                await api.delete(`/payment-methods/${id}`);
+                setSuccessMessage('Payment method deleted successfully!');
+                fetchPaymentMethods();
+            } catch (err) {
+                console.error('Error deleting payment method:', err);
+                setError(err.response?.data?.message || 'Failed to delete payment method.');
+            }
+        }
+    };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (editingMethod) {
-        // Update existing method
-        await apiClient.put(`/payment-methods/${editingMethod.id}`, { name: methodName, is_active: editingMethod.is_active });
-      } else {
-        // Create new method
-        await apiClient.post('/payment-methods', { name: methodName });
-      }
-      fetchMethods();
-      handleCloseModal();
-    } catch (err) {
-      setError('Failed to save payment method.');
-    }
-  };
+    const handleSaveMethod = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        setSuccessMessage('');
+        try {
+            if (isEditing) {
+                await api.put(`/payment-methods/${currentMethod.id}`, currentMethod);
+                setSuccessMessage('Payment method updated successfully!');
+            } else {
+                await api.post('/payment-methods', currentMethod);
+                setSuccessMessage('Payment method added successfully!');
+            }
+            setShowModal(false);
+            fetchPaymentMethods();
+        } catch (err) {
+            console.error('Error saving payment method:', err);
+            setError(err.response?.data?.message || 'Failed to save payment method.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const handleDelete = async (methodId) => {
-    if (window.confirm('Are you sure you want to delete this payment method?')) {
-      try {
-        await apiClient.delete(`/payment-methods/${methodId}`);
-        fetchMethods();
-      } catch (err) {
-        setError('Failed to delete payment method.');
-      }
-    }
-  };
+    return (
+        <div className="page-container payment-methods-page">
+            <h2>Payment Methods Management</h2>
+            {error && <div className="alert error">{error}</div>}
+            {successMessage && <div className="alert success">{successMessage}</div>}
 
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Manage Payment Methods</h2>
-        <button onClick={() => handleOpenModal()}>Add New Method</button>
-      </div>
+            <button className="primary-button" onClick={handleAddClick}>Add New Method</button>
 
-      {isLoading ? <p>Loading...</p> : error ? <p style={{ color: 'red' }}>{error}</p> : (
-        <table border="1" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Method Name</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {methods.map((method) => (
-              <tr key={method.id}>
-                <td>{method.id}</td>
-                <td>{method.name}</td>
-                <td>{method.is_active ? 'Active' : 'Inactive'}</td>
-                <td>
-                  <button onClick={() => handleOpenModal(method)} style={{ marginRight: '5px' }}>Edit</button>
-                  <button onClick={() => handleDelete(method.id)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            {loading ? (
+                <p>Loading payment methods...</p>
+            ) : (
+                <div className="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Active</th>
+                                <th>Approval Required</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {methods.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5">No payment methods found.</td>
+                                </tr>
+                            ) : (
+                                methods.map(method => (
+                                    <tr key={method.id}>
+                                        <td>{method.name}</td>
+                                        <td>{method.type}</td>
+                                        <td>{method.is_active ? 'Yes' : 'No'}</td>
+                                        <td>{method.is_approval_required ? 'Yes' : 'No'}</td>
+                                        <td>
+                                            <button className="edit-button" onClick={() => handleEditClick(method)}>Edit</button>
+                                            <button className="danger-button" onClick={() => handleDeleteClick(method.id)}>Delete</button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <form onSubmit={handleSubmit}>
-          <h4>{editingMethod ? 'Edit' : 'Add New'} Payment Method</h4>
-          <div style={{ margin: '10px 0' }}>
-            <label>Method Name: </label>
-            <input
-              type="text"
-              value={methodName}
-              onChange={(e) => setMethodName(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit">{editingMethod ? 'Update' : 'Create'}</button>
-        </form>
-      </Modal>
-    </div>
-  );
+            <Modal show={showModal} onClose={() => setShowModal(false)} title={isEditing ? "Edit Payment Method" : "Add New Payment Method"}>
+                <form onSubmit={handleSaveMethod}>
+                    <div className="form-group">
+                        <label htmlFor="name">Method Name:</label>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            value={currentMethod.name}
+                            onChange={handleFormChange}
+                            required
+                        />
+                    </div>
+                    <div className="form-group checkbox-group">
+                        <input
+                            type="checkbox"
+                            id="is_active"
+                            name="is_active"
+                            checked={currentMethod.is_active}
+                            onChange={handleFormChange}
+                        />
+                        <label htmlFor="is_active">Is Active</label>
+                    </div>
+                    <div className="form-group checkbox-group">
+                        <input
+                            type="checkbox"
+                            id="is_approval_required"
+                            name="is_approval_required"
+                            checked={currentMethod.is_approval_required}
+                            onChange={handleFormChange}
+                        />
+                        <label htmlFor="is_approval_required">Requires Approval</label>
+                    </div>
+                    <button type="submit" className="primary-button" disabled={loading}>{isEditing ? "Update Method" : "Add Method"}</button>
+                </form>
+            </Modal>
+        </div>
+    );
 };
 
 export default PaymentMethodsPage;

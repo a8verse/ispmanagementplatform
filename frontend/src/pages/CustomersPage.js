@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import apiClient from '../api/axiosConfig';
 import NewCustomerForm from '../components/NewCustomerForm';
-import EditCustomerForm from '../components/EditCustomerForm'; // Import Edit Form
-import Modal from '../components/Modal'; // Import Modal
+import EditCustomerForm from '../components/EditCustomerForm';
+import Modal from '../components/Modal';
+import { Link } from 'react-router-dom';
+import '../App.css';
 
 const CustomersPage = () => {
   const [customers, setCustomers] = useState([]);
@@ -10,10 +12,8 @@ const CustomersPage = () => {
   const [error, setError] = useState('');
   const [showNewForm, setShowNewForm] = useState(false);
 
-  // --- NEW: State for Edit Modal ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
-  // ---------------------------------
 
   const fetchCustomers = async () => {
     try {
@@ -21,7 +21,8 @@ const CustomersPage = () => {
       const response = await apiClient.get('/customers');
       setCustomers(response.data);
     } catch (err) {
-      setError('Failed to fetch customers.');
+      setError(err.response?.data?.message || 'Failed to fetch customers.');
+      console.error("Error fetching customers:", err);
     } finally {
       setIsLoading(false);
     }
@@ -36,7 +37,6 @@ const CustomersPage = () => {
     fetchCustomers();
   };
 
-  // --- NEW: Handlers for Edit Modal ---
   const handleOpenEditModal = (customer) => {
     setEditingCustomer(customer);
     setIsModalOpen(true);
@@ -51,32 +51,36 @@ const CustomersPage = () => {
     handleCloseModal();
     fetchCustomers();
   };
-  // ------------------------------------
 
   const handleDelete = async (customerId) => {
-    if (window.confirm('Are you sure you want to delete this customer?')) {
+    if (window.confirm('Are you sure you want to delete this customer? This will also affect their subscriptions and invoices.')) {
       try {
         await apiClient.delete(`/customers/${customerId}`);
         fetchCustomers();
       } catch (err) {
-        setError('Failed to delete customer.');
+        setError(err.response?.data?.message || 'Failed to delete customer.');
+        console.error("Error deleting customer:", err);
       }
     }
   };
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="page-container customers-page">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h2>Customer Management</h2>
-        <button onClick={() => setShowNewForm(!showNewForm)}>
+        <button className="primary-button" onClick={() => setShowNewForm(!showNewForm)}>
           {showNewForm ? 'Cancel' : 'Add New Customer'}
         </button>
       </div>
 
       {showNewForm && <NewCustomerForm onCustomerCreated={handleCustomerCreated} />}
+      {error && <div className="alert error">{error}</div>}
 
-      {/* Table rendering logic (no changes here)... */}
-     <table border="1" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
+      {isLoading ? (
+        <p>Loading customers...</p>
+      ) : (
+        <div className="table-container">
+          <table>
             <thead>
               <tr>
                 <th>ID</th>
@@ -88,24 +92,32 @@ const CustomersPage = () => {
               </tr>
             </thead>
             <tbody>
-              {customers.map((customer) => (
-                <tr key={customer.id}>
-                  <td>{customer.id}</td>
-                  <td>{customer.full_name}</td>
-                  <td>{customer.email}</td>
-                  <td>{customer.phone_number}</td>
-                  <td>{customer.address}</td>
-                  <td>
-                    <button onClick={() => handleOpenEditModal(customer)} style={{ marginRight: '5px' }}>Edit</button>
-                    <button onClick={() => handleDelete(customer.id)}>Delete</button>
-                  </td>
+              {customers.length === 0 ? (
+                <tr>
+                  <td colSpan="6">No customers found.</td>
                 </tr>
-              ))}
+              ) : (
+                customers.map((customer) => (
+                  <tr key={customer.id}>
+                    <td>{customer.id}</td>
+                    {/* Link to Customer Details Page */}
+                    <td><Link to={`/customers/${customer.id}`}>{customer.full_name}</Link></td>
+                    <td>{customer.email || 'N/A'}</td>
+                    <td>{customer.phone_number}</td>
+                    <td>{customer.address}</td>
+                    <td>
+                      <button className="edit-button" onClick={() => handleOpenEditModal(customer)}>Edit</button>
+                      <button className="danger-button" onClick={() => handleDelete(customer.id)}>Delete</button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
+        </div>
+      )}
 
-      {/* --- NEW: Render the Modal --- */}
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+      <Modal show={isModalOpen} onClose={handleCloseModal} title={editingCustomer ? "Edit Customer" : "Add Customer"}>
         {editingCustomer && (
           <EditCustomerForm
             customer={editingCustomer}
@@ -113,9 +125,8 @@ const CustomersPage = () => {
           />
         )}
       </Modal>
-      {/* ----------------------------- */}
     </div>
   );
 };
 
-export default CustomersPage;	
+export default CustomersPage;

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import apiClient from '../api/axiosConfig';
+import '../App.css'; // Ensure main CSS is loaded
 
-// This component takes a function `onCustomerCreated` as a prop
-// to notify the parent component when a customer is added.
 const NewCustomerForm = ({ onCustomerCreated }) => {
   const [formData, setFormData] = useState({
     full_name: '',
@@ -27,38 +26,37 @@ const NewCustomerForm = ({ onCustomerCreated }) => {
 
     try {
       await apiClient.post('/customers', formData);
-      // On success, clear the form and call the parent's function
       setFormData({ full_name: '', email: '', phone_number: '', address: '' });
-      onCustomerCreated(); // Notify parent to refresh the list
+      onCustomerCreated();
     } catch (err) {
-      setError('Failed to create customer. Please check the details and try again.');
-      console.error(err);
+      setError(err.response?.data?.message || 'Failed to create customer. Please check the details and try again.');
+      console.error("Error creating customer:", err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '5px', marginTop: '20px' }}>
-      <h4>Add New Customer</h4>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <div style={{ marginBottom: '10px' }}>
-        <label>Full Name: </label>
-        <input type="text" name="full_name" value={formData.full_name} onChange={handleChange} required />
+    <form onSubmit={handleSubmit} className="page-container" style={{marginTop: '20px'}}>
+      <h3>Add New Customer</h3>
+      {error && <div className="alert error">{error}</div>}
+      <div className="form-group">
+        <label htmlFor="full_name">Full Name: </label>
+        <input type="text" id="full_name" name="full_name" value={formData.full_name} onChange={handleChange} required />
       </div>
-      <div style={{ marginBottom: '10px' }}>
-        <label>Email: </label>
-        <input type="email" name="email" value={formData.email} onChange={handleChange} />
+      <div className="form-group">
+        <label htmlFor="email">Email: </label>
+        <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} />
       </div>
-      <div style={{ marginBottom: '10px' }}>
-        <label>Phone Number: </label>
-        <input type="text" name="phone_number" value={formData.phone_number} onChange={handleChange} required />
+      <div className="form-group">
+        <label htmlFor="phone_number">Phone Number: </label>
+        <input type="text" id="phone_number" name="phone_number" value={formData.phone_number} onChange={handleChange} required />
       </div>
-      <div style={{ marginBottom: '10px' }}>
-        <label>Address: </label>
-        <input type="text" name="address" value={formData.address} onChange={handleChange} required />
+      <div className="form-group">
+        <label htmlFor="address">Address: </label>
+        <input type="text" id="address" name="address" value={formData.address} onChange={handleChange} required />
       </div>
-      <button type="submit" disabled={isSubmitting}>
+      <button type="submit" className="primary-button" disabled={isSubmitting}>
         {isSubmitting ? 'Creating...' : 'Create Customer'}
       </button>
     </form>

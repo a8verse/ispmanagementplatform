@@ -1,15 +1,13 @@
+// backend/src/controllers/auth.controller.js
 const pool = require('../config/db.config');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Register a new user
 exports.register = async (req, res) => {
   const { role_id, username, password, email, full_name } = req.body;
-
   if (!role_id || !username || !password || !email) {
     return res.status(400).send({ message: "Missing required fields." });
   }
-
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const sql = 'INSERT INTO users (role_id, username, password_hash, email, full_name) VALUES (?, ?, ?, ?, ?)';
@@ -24,31 +22,26 @@ exports.register = async (req, res) => {
   }
 };
 
-// Log in an existing user
 exports.login = async (req, res) => {
   const { username, password } = req.body;
-
   if (!username || !password) {
     return res.status(400).send({ message: "Username and password are required." });
   }
-
   try {
-    const sql = 'SELECT * FROM users WHERE username = ?';
+    const sql = 'SELECT u.*, r.name as role_name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.username = ?';
     const [users] = await pool.query(sql, [username]);
 
     if (users.length === 0) {
       return res.status(401).send({ message: "Invalid credentials." });
     }
-
     const user = users[0];
     const isPasswordCorrect = await bcrypt.compare(password, user.password_hash);
-
     if (!isPasswordCorrect) {
       return res.status(401).send({ message: "Invalid credentials." });
     }
 
     const token = jwt.sign(
-      { id: user.id, role: user.role_id },
+      { id: user.id, role: user.role_name },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -59,10 +52,10 @@ exports.login = async (req, res) => {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        role: user.role_name
       }
     });
-
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).send({ message: "Internal server error." });

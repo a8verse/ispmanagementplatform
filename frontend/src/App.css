@@ -1,38 +1,710 @@
-.App {
-  text-align: center;
+/* frontend/src/App.css - Consolidated and Redesigned Styles for Net Controller */
+
+/* -------------------- 0. Global & Base Styles -------------------- */
+:root {
+    /* Primary Colors */
+    --color-primary: #007bff; /* Blue for primary actions/buttons */
+    --color-primary-dark: #0056b3; /* Darker blue on hover */
+
+    /* Secondary Colors (Neutral/Action) */
+    --color-secondary: #6c757d; /* Grey for secondary actions */
+    --color-secondary-dark: #5a6268; /* Darker grey on hover */
+
+    /* Status Colors */
+    --color-success: #28a745; /* Green for success/paid */
+    --color-danger: #dc3545; /* Red for errors/delete/unpaid */
+    --color-warning: #ffc107; /* Yellow/Orange for warnings/generate */
+    --color-info: #17a2b8; /* Cyan/Turquoise for info/partial */
+
+    /* Neutral Colors for Backgrounds & Text */
+    --color-bg-light: #ffffff; /* White for content cards/modals */
+    --color-bg-medium: #eef2f7; /* Light grey for main content area background */
+    --color-bg-dark: #f0f2f5; /* Very light grey for the overall app background */
+    --color-border: #dee2e6; /* Light grey for borders */
+    --color-text-dark: #343a40; /* Dark charcoal for main text */
+    --color-text-medium: #495057; /* Medium grey for labels, descriptions */
+    --color-text-light: #6c757d; /* Lighter grey for subtle text */
+
+    /* Sidebar Colors */
+    --color-sidebar-bg: #2c3e50; /* Dark blue/grey for sidebar */
+    --color-sidebar-text: #ecf0f1; /* Light grey for sidebar text */
+    --color-sidebar-hover: #34495e; /* Slightly lighter dark blue on hover/active */
+
+    /* Spacing Units */
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 20px;
+    --spacing-lg: 30px;
+    --spacing-xl: 40px;
+
+    /* Borders & Shadows */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: var(--color-text-dark);
+    line-height: 1.6;
+    background-color: var(--color-bg-dark);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+
+/* -------------------- 1. Main Layout Styles -------------------- */
+.main-layout {
+    display: flex;
+    min-height: 100vh;
 }
 
-.App-link {
-  color: #61dafb;
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: var(--color-sidebar-bg);
+    color: var(--color-sidebar-text);
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-md);
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.sidebar-header {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-size: 1.8em;
+    color: var(--color-sidebar-text);
+    font-weight: 600;
+}
+
+.sidebar-nav {
+    flex-grow: 1;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    margin-bottom: var(--spacing-sm);
+}
+
+.sidebar-nav a {
+    display: block;
+    color: var(--color-sidebar-text);
+    text-decoration: none;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-size: 1.05em;
+    font-weight: 500;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background-color: var(--color-sidebar-hover);
+    color: #ffffff;
+}
+
+/* Main Content Area */
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg-medium);
+}
+
+/* Main Header (contains page title and logout button) */
+.main-header {
+    background-color: var(--color-bg-light);
+    padding: var(--spacing-md) var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.main-header h1 {
+    margin: 0;
+    color: var(--color-text-dark);
+    font-size: 1.5em;
+    font-weight: 600;
+}
+
+/* Logout Button */
+.logout-button {
+    background-color: var(--color-danger);
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+    background-color: #c0392b;
+}
+
+.content-area {
+    flex-grow: 1;
+    padding: var(--spacing-md);
+    overflow-y: auto;
+}
+
+/* -------------------- 2. General Component Styles (Forms, Tables, Alerts, Modals) -------------------- */
+
+/* General Page/Card Containers */
+.page-container {
+    padding: var(--spacing-md);
+    background-color: var(--color-bg-light);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+/* Headings within page containers */
+.page-container h2, .page-container h3 {
+    color: var(--color-text-dark);
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
+    font-weight: 600;
+    font-size: 1.8em;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--spacing-sm);
+}
+.page-container h3 {
+    font-size: 1.5em;
+}
+
+/* Alerts for messages (error, success) */
+.alert {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    margin-bottom: var(--spacing-md);
+    font-weight: bold;
+    border: 1px solid transparent;
+}
+
+.alert.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
+.alert.success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+/* General Button Styles */
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+    margin-right: var(--spacing-xs);
+}
+
+button:last-child {
+    margin-right: 0;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+/* Specific Button Classes */
+.primary-button {
+    background-color: var(--color-primary);
+    color: white;
+}
+.primary-button:hover:not(:disabled) {
+    background-color: var(--color-primary-dark);
+}
+
+.secondary-button {
+    background-color: var(--color-secondary);
+    color: white;
+}
+.secondary-button:hover:not(:disabled) {
+    background-color: var(--color-secondary-dark);
+}
+
+.danger-button {
+    background-color: var(--color-danger);
+    color: white;
+}
+.danger-button:hover:not(:disabled) {
+    background-color: #c82333;
+}
+
+.edit-button {
+    background-color: var(--color-warning);
+    color: var(--color-text-dark);
+}
+.edit-button:hover:not(:disabled) {
+    background-color: #e0a800;
+}
+
+
+/* Forms - General Styles */
+form {
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    background-color: var(--color-bg-light);
+}
+
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: bold;
+    color: var(--color-text-medium);
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="number"],
+.form-group input[type="date"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-group.checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.form-group.checkbox-group input[type="checkbox"] {
+    margin-right: var(--spacing-sm);
+    width: auto;
+}
+
+/* Tables - General Styles */
+.table-container {
+    overflow-x: auto;
+    background-color: var(--color-bg-light);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    margin-top: var(--spacing-md);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+}
+
+th {
+    background-color: var(--color-bg-medium);
+    color: var(--color-text-dark);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background-color: var(--color-bg-light);
+}
+
+/* Status Badges/Text */
+.status-unpaid {
+    color: var(--color-danger);
+    font-weight: bold;
+}
+.status-paid {
+    color: var(--color-success);
+    font-weight: bold;
+}
+.status-pending-approval {
+    color: var(--color-warning);
+    font-weight: bold;
+}
+.status-rejected {
+    color: var(--color-secondary);
+    font-weight: bold;
+}
+.status-active {
+    color: var(--color-success);
+    font-weight: bold;
+}
+.status-inactive, .status-cancelled, .status-expired {
+    color: var(--color-secondary);
+    font-weight: bold;
+}
+.status-suspended {
+    color: var(--color-warning);
+    font-weight: bold;
+}
+
+
+/* Modal Styling */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: var(--color-bg-light);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-md);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+    color: var(--color-text-dark);
+}
+
+.modal-close-button {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: var(--color-secondary);
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-md);
+}
+.modal-close-button:hover {
+    color: var(--color-text-dark);
+}
+
+
+/* -------------------- 5. Page Specific Adjustments -------------------- */
+
+/* Login Page Styles */
+.login-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--color-bg-dark);
+    background-image: url('https://source.unsplash.com/random/1920x1080/?network,abstract,tech');
+    background-size: cover;
+    background-position: center;
+    color: var(--color-text-dark);
+}
+
+.login-box {
+    background-color: var(--color-bg-light);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-box h2 {
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-lg);
+    font-size: 2em;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.login-box .form-group {
+    margin-bottom: var(--spacing-md);
+    text-align: left;
+}
+
+.login-box input[type="text"],
+.login-box input[type="password"] {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+.login-box button.primary-button {
+    width: 100%;
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 1.1em;
+}
+
+.login-box .alert {
+    text-align: center;
+    margin-top: var(--spacing-md);
+}
+
+
+/* Customers Page specific overrides/additions */
+.customers-page .add-button {
+    margin-bottom: var(--spacing-md);
+}
+
+/* Billing Page specific overrides/additions */
+.billing-page .controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
+    background-color: var(--color-bg-light);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.billing-page .controls .form-group {
+    margin-bottom: 0;
+    flex-grow: 1;
+    margin-right: var(--spacing-md);
+}
+
+.billing-page .controls select {
+    width: 250px;
+}
+
+.billing-page .generate-invoices-button {
+    background-color: var(--color-warning);
+    color: var(--color-text-dark);
+}
+.billing-page .generate-invoices-button:hover:not(:disabled) {
+    background-color: #e0a800;
+}
+
+.billing-page .invoices-section h3 {
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+}
+
+.billing-page td .primary-button,
+.billing-page td .secondary-button {
+    font-size: 0.9em;
+    padding: 6px 10px;
+}
+
+.billing-page .manual-payment-details {
+    background-color: var(--color-bg-medium);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    margin-bottom: var(--spacing-md);
+    font-size: 0.95em;
+    color: var(--color-text-medium);
+}
+
+.billing-page .manual-payment-details strong {
+    color: var(--color-text-dark);
+}
+
+/* Manual Payments Approval Page specific adjustments */
+.manual-payments-approval-page .approve-button {
+    background-color: var(--color-success);
+    color: white;
+}
+.manual-payments-approval-page .approve-button:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.manual-payments-approval-page .reject-button {
+    background-color: var(--color-danger);
+    color: white;
+}
+.manual-payments-approval-page .reject-button:hover:not(:disabled) {
+    background-color: #c82333;
+}
+
+/* Customer Details Page Specific Styles */
+.customer-details-page .customer-info-section {
+    margin-bottom: var(--spacing-lg);
+}
+.customer-details-page .customer-info-section p {
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.1em;
+}
+.customer-details-page .subscriptions-section .primary-button {
+    margin-bottom: var(--spacing-md);
+}
+.customer-details-page .subscriptions-section h3 {
+    margin-top: 0;
+}
+
+
+/* -------------------- 6. Responsive Adjustments -------------------- */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 200px;
+        padding: var(--spacing-md) var(--spacing-sm);
+    }
+    .main-header {
+        padding: var(--spacing-md) var(--spacing-md);
+    }
+    .content-area {
+        padding: var(--spacing-sm);
+    }
+    .page-container {
+        padding: var(--spacing-md);
+    }
+    th, td {
+        padding: var(--spacing-sm);
+        font-size: 0.95em;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        padding: var(--spacing-sm) var(--spacing-md);
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 99;
+    }
+
+    .sidebar-header {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .sidebar-header h3 {
+        font-size: 1.5em;
+    }
+
+    .sidebar-nav {
+        display: none;
+    }
+
+    .main-content {
+        margin-top: 70px;
+    }
+
+    .main-header {
+        padding: var(--spacing-sm) var(--spacing-md);
+        position: sticky;
+        top: 70px;
+        z-index: 90;
+    }
+
+    .main-header h1 {
+        font-size: 1.2em;
+    }
+
+    .content-area {
+        padding: var(--spacing-sm);
+    }
+
+    .billing-page .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .billing-page .controls .form-group {
+        margin-right: 0;
+        margin-bottom: var(--spacing-md);
+    }
+    .billing-page .controls select {
+        width: 100%;
+    }
+    .billing-page .generate-invoices-button {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    th, td {
+        font-size: 0.85em;
+        padding: 8px 10px;
+    }
+
+    .table-container table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    .table-container thead, .table-container tbody, .table-container tr {
+        display: inline-block;
+        vertical-align: top;
+        white-space: normal;
+    }
+    .table-container th:nth-child(even),
+    .table-container td:nth-child(even) {
+        background-color: var(--color-bg-light);
+    }
 }

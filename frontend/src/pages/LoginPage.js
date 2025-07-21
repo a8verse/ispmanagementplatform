@@ -1,13 +1,17 @@
+// frontend/src/pages/LoginPage.js
 import React, { useState } from 'react';
 import apiClient from '../api/axiosConfig';
+import { useNavigate } from 'react-router-dom';
+import '../App.css'; // Ensure main CSS is loaded for styling
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault(); // Prevent form from reloading the page
+    e.preventDefault();
     setError('');
 
     try {
@@ -16,44 +20,47 @@ const LoginPage = () => {
         password,
       });
 
-      // On successful login, save the token and user data
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('userRole', response.data.user.role); // Store the user's role name
 
-      // Redirect to the dashboard (we will create this next)
-      window.location.href = '/dashboard';
+      navigate('/dashboard');
 
     } catch (err) {
-      setError('Invalid username or password.');
-      console.error(err);
+      setError(err.response?.data?.message || 'Invalid username or password.');
+      console.error("Login Error:", err);
     }
   };
 
   return (
-    <div>
-      <h2>ISP Management Login</h2>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>Username:</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit">Login</button>
-      </form>
+    <div className="login-page-container">
+      <div className="login-box">
+        <h2>Net Controller Login</h2>
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label htmlFor="username">Username:</label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Password:</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          {error && <p className="alert error">{error}</p>}
+          <button type="submit" className="primary-button">Login</button>
+        </form>
+      </div>
     </div>
   );
 };
