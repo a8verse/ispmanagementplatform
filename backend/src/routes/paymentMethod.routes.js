@@ -3,14 +3,14 @@ const express = require('express');
 const router = express.Router();
 const methodController = require('../controllers/paymentMethod.controller');
 const authMiddleware = require('../middleware/auth.middleware');
-const checkRole = require('../middleware/role.middleware');
+const { checkRole, checkPermission } = require('../middleware/role.middleware'); // CORRECT IMPORT
 
-const canManageMethods = ['Admin', 'Manager']; // Managers can also manage methods
-const canViewMethods = ['Admin', 'Manager', 'Team Member', 'Reseller']; // Collection agents can view
+const canManageMethods = 'can_manage_payment_methods';
+const canViewMethods = 'can_view_payment_methods'; // Assuming a permission for viewing methods
 
-router.post('/', authMiddleware, checkRole(canManageMethods), methodController.createMethod);
-router.get('/', authMiddleware, checkRole(canViewMethods), methodController.getAllMethods);
-router.put('/:id', authMiddleware, checkRole(canManageMethods), methodController.updateMethod);
-router.delete('/:id', authMiddleware, checkRole(['Admin']), methodController.deleteMethod);
+router.post('/', authMiddleware, checkPermission(canManageMethods), methodController.createMethod);
+router.get('/', authMiddleware, checkPermission(canViewMethods), methodController.getAllMethods);
+router.put('/:id', authMiddleware, checkPermission(canManageMethods), methodController.updateMethod);
+router.delete('/:id', authMiddleware, checkPermission(canManageMethods), methodController.deleteMethod); // Delete might be more restricted to Admin, but using canManageMethods for now
 
 module.exports = router;

@@ -1,5 +1,5 @@
 // frontend/src/pages/CustomerDetailsPage.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } => 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import Modal from '../components/Modal';

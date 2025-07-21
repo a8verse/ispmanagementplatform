@@ -3,26 +3,14 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user.controller');
 const authMiddleware = require('../middleware/auth.middleware');
-const checkRole = require('../middleware/role.middleware');
-const checkPermission = require('../middleware/role.middleware').checkPermission; // Import specific permission checker
+const { checkRole, checkPermission } = require('../middleware/role.middleware'); // CORRECT IMPORT
 
-// User Management requires 'can_manage_users' permission (typically Admin/Super Admin)
-// Note: We might allow 'Admin' role to have 'can_manage_users' permission.
+const canManageUsers = 'can_manage_users'; // Permission for managing users
 
-// Create a new user (requires 'can_manage_users' permission)
-router.post('/', authMiddleware, checkPermission('can_manage_users'), userController.createUser);
-
-// Get all users (requires 'can_manage_users' permission to view list)
-router.get('/', authMiddleware, checkPermission('can_manage_users'), userController.getAllUsers);
-
-// Get a single user by ID (requires 'can_manage_users' or self-access)
-// For simplicity, current checkPermission is broad. Later, add self-access logic if needed.
-router.get('/:id', authMiddleware, checkPermission('can_manage_users'), userController.getUserById);
-
-// Update a user by ID (requires 'can_manage_users' permission)
-router.put('/:id', authMiddleware, checkPermission('can_manage_users'), userController.updateUser);
-
-// Delete a user by ID (requires 'can_manage_users' permission, with specific check in controller)
-router.delete('/:id', authMiddleware, checkPermission('can_manage_users'), userController.deleteUser);
+router.post('/', authMiddleware, checkPermission(canManageUsers), userController.createUser);
+router.get('/', authMiddleware, checkPermission(canManageUsers), userController.getAllUsers);
+router.get('/:id', authMiddleware, checkPermission(canManageUsers), userController.getUserById);
+router.put('/:id', authMiddleware, checkPermission(canManageUsers), userController.updateUser);
+router.delete('/:id', authMiddleware, checkPermission(canManageUsers), userController.deleteUser);
 
 module.exports = router;
